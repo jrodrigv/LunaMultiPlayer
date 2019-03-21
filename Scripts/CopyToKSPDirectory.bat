@@ -3,8 +3,8 @@
 
 ::Set the directories in the setdirectories.bat file if you want a different folder than Kerbal Space Program
 ::EXAMPLE:
-SET KSPPATH=C:\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program
-SET KSPPATH2=C:\Users\Malte\Desktop\Kerbal Space Program
+SET KSPPATH=G:\GAMES\KERBAL\Kerbal Space Program_DEV_161_M
+SET KSPPATH2=G:\GAMES\KERBAL\Kerbal Space Program_DEV_161
 call "%~dp0\SetDirectories.bat"
 
 IF DEFINED KSPPATH (ECHO KSPPATH is defined) ELSE (SET KSPPATH=C:\Kerbal Space Program)
