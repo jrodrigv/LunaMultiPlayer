@@ -1,6 +1,7 @@
-﻿using LunaCommon.Enums;
-using LunaCommon.Message.Data.CraftLibrary;
-using LunaCommon.Message.Server;
+﻿using ByteSizeLib;
+using LmpCommon.Enums;
+using LmpCommon.Message.Data.CraftLibrary;
+using LmpCommon.Message.Server;
 using Server.Client;
 using Server.Context;
 using Server.Log;
@@ -17,7 +18,7 @@ namespace Server.System
 {
     public class CraftLibrarySystem
     {
-        private static readonly string CraftFolder = Path.Combine(ServerContext.UniverseDirectory, "Crafts");
+        public static readonly string CraftPath = Path.Combine(ServerContext.UniverseDirectory, "Crafts");
         private static readonly ConcurrentDictionary<string, DateTime> LastRequest = new ConcurrentDictionary<string, DateTime>();
 
         #region Public Methods
@@ -32,7 +33,7 @@ namespace Server.System
 
             Task.Run(() =>
             {
-                var file = Path.Combine(CraftFolder, data.CraftToDelete.FolderName, data.CraftToDelete.CraftType.ToString(),
+                var file = Path.Combine(CraftPath, data.CraftToDelete.FolderName, data.CraftToDelete.CraftType.ToString(),
                     $"{data.CraftToDelete.CraftName}.craft");
 
                 if (FileHandler.FileExists(file))
@@ -52,7 +53,7 @@ namespace Server.System
         {
             Task.Run(() =>
             {
-                var playerFolderType = Path.Combine(CraftFolder, client.PlayerName, data.Craft.CraftType.ToString());
+                var playerFolderType = Path.Combine(CraftPath, client.PlayerName, data.Craft.CraftType.ToString());
                 if (!Directory.Exists(playerFolderType))
                 {
                     Directory.CreateDirectory(playerFolderType);
@@ -67,7 +68,7 @@ namespace Server.System
 
                     if (FileHandler.FileExists(fullPath))
                     {
-                        LunaLog.Normal($"Overwriting craft {data.Craft.CraftName} ({data.Craft.NumBytes} bytes) from: {client.PlayerName}.");
+                        LunaLog.Normal($"Overwriting craft {data.Craft.CraftName} ({ByteSize.FromBytes(data.Craft.NumBytes).KiloBytes}{ByteSize.KiloByteSymbol}) from: {client.PlayerName}.");
 
                         //Send a msg to all the players so they remove the old copy
                         var deleteMsg = ServerContext.ServerMessageFactory.CreateNewMessageData<CraftLibraryDeleteRequestMsgData>();
@@ -79,7 +80,7 @@ namespace Server.System
                     }
                     else
                     {
-                        LunaLog.Normal($"Saving craft {data.Craft.CraftName} ({data.Craft.NumBytes} bytes) from: {client.PlayerName}.");
+                        LunaLog.Normal($"Saving craft {data.Craft.CraftName} ({ByteSize.FromBytes(data.Craft.NumBytes).KiloBytes} KB) from: {client.PlayerName}.");
                         FileHandler.WriteToFile(fullPath, data.Craft.Data, data.Craft.NumBytes);
                     }
                     SendNotification(client.PlayerName);
@@ -106,7 +107,7 @@ namespace Server.System
             Task.Run(() =>
             {
                 var msgData = ServerContext.ServerMessageFactory.CreateNewMessageData<CraftLibraryFoldersReplyMsgData>();
-                msgData.Folders = Directory.GetDirectories(CraftFolder)
+                msgData.Folders = Directory.GetDirectories(CraftPath)
                     .Where(d=> Directory.GetFiles(d, "*.craft", SearchOption.AllDirectories).Length > 0)
                     .Select(d => new DirectoryInfo(d).Name).ToArray();
 
@@ -126,7 +127,7 @@ namespace Server.System
             Task.Run(() =>
             {
                 var crafts = new List<CraftBasicInfo>();
-                var playerFolder = Path.Combine(CraftFolder, data.FolderName);
+                var playerFolder = Path.Combine(CraftPath, data.FolderName);
 
                 foreach (var craftType in Enum.GetNames(typeof(CraftType)))
                 {
@@ -169,7 +170,7 @@ namespace Server.System
                 if (DateTime.Now - lastTime > TimeSpan.FromMilliseconds(CraftSettings.SettingsStore.MinCraftLibraryRequestIntervalMs))
                 {
                     LastRequest.AddOrUpdate(client.PlayerName, DateTime.Now, (key, existingVal) => DateTime.Now);
-                    var file = Path.Combine(CraftFolder, data.CraftRequested.FolderName, data.CraftRequested.CraftType.ToString(),
+                    var file = Path.Combine(CraftPath, data.CraftRequested.FolderName, data.CraftRequested.CraftType.ToString(),
                         $"{data.CraftRequested.CraftName}.craft");
 
                     if (FileHandler.FileExists(file))
@@ -181,7 +182,7 @@ namespace Server.System
                         msgData.Craft.FolderName = data.CraftRequested.FolderName;
                         msgData.Craft.CraftName = data.CraftRequested.CraftName;
 
-                        LunaLog.Debug($"Sending craft ({msgData.Craft.NumBytes} bytes): {data.CraftRequested.CraftName} to: {client.PlayerName}.");
+                        LunaLog.Debug($"Sending craft ({ByteSize.FromBytes(msgData.Craft.NumBytes).KiloBytes}{ByteSize.KiloByteSymbol}): {data.CraftRequested.CraftName} to: {client.PlayerName}.");
                         MessageQueuer.SendToClient<CraftLibrarySrvMsg>(client, msgData);
                     }
                 }
@@ -212,9 +213,9 @@ namespace Server.System
         /// </summary>
         private static void CheckMaxFolders()
         {
-            while (Directory.GetDirectories(CraftFolder).Length > CraftSettings.SettingsStore.MaxCraftFolders)
+            while (Directory.GetDirectories(CraftPath).Length > CraftSettings.SettingsStore.MaxCraftFolders)
             {
-                var oldestFolder = Directory.GetDirectories(CraftFolder).Select(d => new DirectoryInfo(d)).OrderBy(d => d.LastWriteTime).FirstOrDefault();
+                var oldestFolder = Directory.GetDirectories(CraftPath).Select(d => new DirectoryInfo(d)).OrderBy(d => d.LastWriteTime).FirstOrDefault();
                 if (oldestFolder != null)
                 {
                     LunaLog.Debug($"Removing oldest crafts folder {oldestFolder.Name}");

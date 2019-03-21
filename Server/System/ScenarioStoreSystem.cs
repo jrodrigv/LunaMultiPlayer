@@ -1,6 +1,7 @@
-﻿using LunaCommon.Xml;
-using Server.Context;
-using Server.Events;
+﻿using LunaConfigNode;
+using LunaConfigNode.CfgNode;
+using Server.Settings.Structures;
+using Server.System.Scenario;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
@@ -10,37 +11,58 @@ using System.Linq;
 namespace Server.System
 {
     /// <summary>
-    /// Here we keep a copy of all the scnarios modules in XML format and we also save them to files at a specified rate
+    /// Here we keep a copy of all the scnarios modules in ConfigNode format and we also save them to files at a specified rate
     /// </summary>
     public static class ScenarioStoreSystem
     {
-        public static string ScenariosFolder = Path.Combine(ServerContext.UniverseDirectory, "Scenarios");
-
-        public static ConcurrentDictionary<string, string> CurrentScenariosInXmlFormat = new ConcurrentDictionary<string, string>();
+        public static ConcurrentDictionary<string, ConfigNode> CurrentScenarios = new ConcurrentDictionary<string, ConfigNode>();
 
         private static readonly object BackupLock = new object();
-
-        static ScenarioStoreSystem() => ExitEvent.ServerClosing += BackupScenarios;
-
+        
         /// <summary>
-        /// Returns a XML scenario in the standard KSP format
+        /// Returns a scenario in the standard KSP format
         /// </summary>
         public static string GetScenarioInConfigNodeFormat(string scenarioName)
         {
-            return CurrentScenariosInXmlFormat.TryGetValue(scenarioName, out var scenarioInXmlFormat) ?
-                ConfigNodeXmlParser.ConvertToConfigNode(scenarioInXmlFormat) : null;
+            return CurrentScenarios.TryGetValue(scenarioName, out var scenario) ?
+                scenario.ToString() : null;
         }
 
         /// <summary>
         /// Load the stored scenarios into the dictionary
         /// </summary>
-        public static void LoadExistingScenarios()
+        public static void LoadExistingScenarios(bool createdFromScratch)
+        {
+            ChangeExistingScenarioFormats();
+            lock (BackupLock)
+            {
+                foreach (var file in Directory.GetFiles(ScenarioSystem.ScenariosPath).Where(f => Path.GetExtension(f) == ScenarioSystem.ScenarioFileFormat))
+                {
+                    CurrentScenarios.TryAdd(Path.GetFileNameWithoutExtension(file), new ConfigNode(File.ReadAllText(file)));
+                }
+
+                if (createdFromScratch)
+                {
+                    ScenarioDataUpdater.WriteScienceDataToFile(GameplaySettings.SettingsStore.StartingScience);
+                    ScenarioDataUpdater.WriteReputationDataToFile(GameplaySettings.SettingsStore.StartingReputation);
+                    ScenarioDataUpdater.WriteFundsDataToFile(GameplaySettings.SettingsStore.StartingFunds);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Transform OLD Xml scenarios into the new format
+        /// TODO: Remove this for next version
+        /// </summary>
+        public static void ChangeExistingScenarioFormats()
         {
             lock (BackupLock)
             {
-                foreach (var file in Directory.GetFiles(ScenariosFolder).Where(f => Path.GetExtension(f) == ".xml"))
+                foreach (var file in Directory.GetFiles(ScenarioSystem.ScenariosPath).Where(f => Path.GetExtension(f) == ".xml"))
                 {
-                    CurrentScenariosInXmlFormat.TryAdd(Path.GetFileNameWithoutExtension(file), FileHandler.ReadFileText(file));
+                    var vesselAsCfgNode = XmlConverter.ConvertToConfigNode(FileHandler.ReadFileText(file));
+                    FileHandler.WriteToFile(file.Replace(".xml", ".txt"), vesselAsCfgNode);
+                    FileHandler.FileDelete(file);
                 }
             }
         }
@@ -52,10 +74,10 @@ namespace Server.System
         {
             lock (BackupLock)
             {
-                var scenariosInXml = CurrentScenariosInXmlFormat.ToArray();
+                var scenariosInXml = CurrentScenarios.ToArray();
                 foreach (var scenario in scenariosInXml)
                 {
-                    FileHandler.WriteToFile(Path.Combine(ScenariosFolder, $"{scenario.Key}.xml"), scenario.Value);
+                    FileHandler.WriteToFile(Path.Combine(ScenarioSystem.ScenariosPath, $"{scenario.Key}{ScenarioSystem.ScenarioFileFormat}"), scenario.Value.ToString());
                 }
             }
         }

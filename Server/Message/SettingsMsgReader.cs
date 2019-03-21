@@ -1,7 +1,7 @@
-﻿using LunaCommon.Enums;
-using LunaCommon.Message.Data.Settings;
-using LunaCommon.Message.Interface;
-using LunaCommon.Message.Server;
+﻿using LmpCommon.Enums;
+using LmpCommon.Message.Data.Settings;
+using LmpCommon.Message.Interface;
+using LmpCommon.Message.Server;
 using Server.Client;
 using Server.Context;
 using Server.Message.Base;
@@ -30,21 +30,17 @@ namespace Server.Message
             msgData.SafetyBubbleDistance = GeneralSettings.SettingsStore.SafetyBubbleDistance;
             msgData.VesselUpdatesMsInterval = IntervalSettings.SettingsStore.VesselUpdatesMsInterval;
             msgData.SecondaryVesselUpdatesMsInterval = IntervalSettings.SettingsStore.SecondaryVesselUpdatesMsInterval;
-            msgData.ForceInterpolationOffset = InterpolationSettings.SettingsStore.ForceInterpolationOffset;
-            msgData.InterpolationOffsetMs = InterpolationSettings.SettingsStore.InterpolationOffsetMs;
-            msgData.ForceInterpolation = InterpolationSettings.SettingsStore.ForceInterpolation;
-            msgData.InterpolationValue = InterpolationSettings.SettingsStore.InterpolationValue;
-            msgData.ShowVesselsInThePast = GeneralSettings.SettingsStore.ShowVesselsInThePast;
-            msgData.WarpMaster = WarpSettings.SettingsStore.WarpMaster;
             msgData.MinScreenshotIntervalMs = ScreenshotSettings.SettingsStore.MinScreenshotIntervalMs;
             msgData.MaxScreenshotWidth = ScreenshotSettings.SettingsStore.MaxScreenshotWidth;
             msgData.MaxScreenshotHeight = ScreenshotSettings.SettingsStore.MaxScreenshotHeight;
             msgData.MinCraftLibraryRequestIntervalMs = CraftSettings.SettingsStore.MinCraftLibraryRequestIntervalMs;
+            msgData.PrintMotdInChat = GeneralSettings.SettingsStore.PrintMotdInChat;
 
             if (GeneralSettings.SettingsStore.GameDifficulty == GameDifficulty.Custom && GameplaySettings.SettingsStore != null)
             {
                 msgData.EnableCommNet = GameplaySettings.SettingsStore.CommNetwork;
                 msgData.RespawnTimer = GameplaySettings.SettingsStore.RespawnTime;
+                msgData.AllowOtherLaunchSites = GameplaySettings.SettingsStore.AllowOtherLaunchSites;
                 msgData.AllowStockVessels = GameplaySettings.SettingsStore.AllowStockVessels;
                 msgData.AutoHireCrews = GameplaySettings.SettingsStore.AutoHireCrews;
                 msgData.BypassEntryPurchaseAfterResearch = GameplaySettings.SettingsStore.BypassEntryPurchaseAfterResearch;

@@ -1,5 +1,5 @@
-﻿using LunaCommon.Enums;
-using LunaCommon.Xml;
+﻿using LmpCommon.Enums;
+using LmpCommon.Xml;
 using System;
 
 namespace Server.Settings.Definition
@@ -12,6 +12,9 @@ namespace Server.Settings.Definition
 
         [XmlComment(Value = "Description of the server. Max 200 char")]
         public string Description { get; set; } = "Luna Server Description";
+
+        [XmlComment(Value = "By default this will be given by the masterserver but you can override it here if you want. Max 2 char")]
+        public string CountryCode { get; set; } = "";
 
         [XmlComment(Value = "Website text to display (discord, website, forum, etc). Can be left empty. Max 15 char")]
         public string WebsiteText { get; set; } = "LMP";
@@ -26,7 +29,10 @@ namespace Server.Settings.Definition
         public string AdminPassword { get; set; } = "";
 
         [XmlComment(Value = "Specify the server's MOTD (message of the day). 255 chars max")]
-        public string ServerMotd { get; set; } = "Welcome, %Name%!";
+        public string ServerMotd { get; set; } = "Hi %Name%!\nWelcome to %ServerName%.\nOnline players: %PlayerCount%";
+
+        [XmlComment(Value = "Writes the server's MOTD (message of the day) in the chat of the user who joins")]
+        public bool PrintMotdInChat { get; set; } = false;
 
         [XmlComment(Value = "Maximum amount of players that can join the server.")]
         public int MaxPlayers { get; set; } = 20;
@@ -39,9 +45,6 @@ namespace Server.Settings.Definition
 
         [XmlComment(Value = "Specify in minutes how often /nukeksc automatically runs. 0 = Disabled")]
         public float AutoNuke { get; set; } = 0.0f;
-
-        [XmlComment(Value = "Specify if the vessels that are being CONTROLLED and in a past subspace will be shown for players in future subspaces")]
-        public bool ShowVesselsInThePast { get; set; } = true;
 
         [XmlComment(Value = "Enable use of Cheats in-game.")]
         public bool Cheats { get; set; } = true;

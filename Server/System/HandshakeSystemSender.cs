@@ -1,6 +1,6 @@
-﻿using LunaCommon.Enums;
-using LunaCommon.Message.Data.Handshake;
-using LunaCommon.Message.Server;
+﻿using LmpCommon.Enums;
+using LmpCommon.Message.Data.Handshake;
+using LmpCommon.Message.Server;
 using Server.Client;
 using Server.Context;
 using Server.Server;
@@ -19,7 +19,7 @@ namespace Server.System
             if (enumResponse == HandshakeReply.HandshookSuccessfully)
             {
                 msgData.ModControl = GeneralSettings.SettingsStore.ModControl;
-                msgData.ServerStartTime = ServerContext.StartTime;
+                msgData.ServerStartTime = TimeContext.StartTime.Ticks;
 
                 if (GeneralSettings.SettingsStore.ModControl)
                 {

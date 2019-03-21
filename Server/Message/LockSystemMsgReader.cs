@@ -1,7 +1,7 @@
 ﻿using System;
-using LunaCommon.Message.Data.Lock;
-using LunaCommon.Message.Interface;
-using LunaCommon.Message.Types;
+using LmpCommon.Message.Data.Lock;
+using LmpCommon.Message.Interface;
+using LmpCommon.Message.Types;
 using Server.Client;
 using Server.Message.Base;
 using Server.System;
@@ -23,7 +23,7 @@ namespace Server.Message
                 case LockMessageType.Acquire:
                     var acquireData = (LockAcquireMsgData)data;
                     if (acquireData.Lock.PlayerName == client.PlayerName)
-                        LockSystemSender.SendLockAquireMessage(client, acquireData.Lock, acquireData.Force);
+                        LockSystemSender.SendLockAcquireMessage(client, acquireData.Lock, acquireData.Force);
                     break;
                 case LockMessageType.Release:
                     var releaseData = (LockReleaseMsgData)data;

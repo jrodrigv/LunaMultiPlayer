@@ -1,7 +1,7 @@
 ﻿using Lidgren.Network;
-using LunaCommon.Enums;
-using LunaCommon.Message.Data.PlayerConnection;
-using LunaCommon.Message.Server;
+using LmpCommon.Enums;
+using LmpCommon.Message.Data.PlayerConnection;
+using LmpCommon.Message.Server;
 using Server.Context;
 using Server.Log;
 using Server.Plugin;
@@ -57,6 +57,12 @@ namespace Server.Client
                 {
                     LunaLog.Error($"Error closing client Connection: {e.Message}");
                 }
+            }
+
+            //As this is the last client that is connected to the server, run a safety backup once he disconnects
+            if (ServerContext.Clients.Count == 0)
+            {
+                BackupSystem.RunBackup();
             }
         }
     }

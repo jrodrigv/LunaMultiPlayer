@@ -1,10 +1,10 @@
-﻿using LunaUpdater;
-using LunaUpdater.Appveyor;
-using LunaUpdater.Github;
+﻿using LmpUpdater;
+using LmpUpdater.Appveyor;
+using LmpUpdater.Github;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -25,13 +25,23 @@ namespace MasterServer
 #else
         private const bool DebugVersion = false;
 #endif
-        private const string DllFileName = "LMP.MasterServer.dll";
+        private const string DllFileName = "LmpMasterServer.dll";
 
         private static readonly ManualResetEvent QuitEvent = new ManualResetEvent(false);
         private static readonly string DllPath = Path.Combine(Directory.GetCurrentDirectory(), DllFileName);
         private static readonly AppDomainSetup DomainSetup = new AppDomainSetup { ApplicationBase = AppDomain.CurrentDomain.BaseDirectory };
 
-        private static Version CurrentVersion => Assembly.GetExecutingAssembly().GetName().Version;
+        private static Version CurrentVersion
+        {
+            get
+            {
+                var dllVersion = FileVersionInfo.GetVersionInfo(DllPath).FileVersion;
+                var versionComponents = dllVersion.Split('.');
+
+                return new Version(int.Parse(versionComponents[0]), int.Parse(versionComponents[1]), int.Parse(versionComponents[2]));
+            }
+        }
+
         private static AppDomain LmpDomain { get; set; }
         private static string[] Arguments { get; set; }
 
@@ -39,9 +49,13 @@ namespace MasterServer
 
         private static void Main(string[] args)
         {
+            //Uncomment this to properly debug the code
+            //LmpMasterServer.EntryPoint.MainEntryPoint(new string[0]);
+            //while (true) { Thread.Sleep(100); }
+
             if (!File.Exists(DllPath))
             {
-                ConsoleLogger.Log(LogLevels.Error, $"Cannot find needed file {DllFileName}");
+                LogError($"Cannot find needed file {DllFileName}");
                 return;
             }
 
@@ -54,7 +68,7 @@ namespace MasterServer
                 eArgs.Cancel = true;
             };
 
-            CheckNewVersion(args.Any(a=> a.Contains("nightly")));
+            CheckNewVersion(args.Any(a => a.Contains("nightly")));
             StartMasterServerDll();
             QuitEvent.WaitOne();
         }
@@ -64,7 +78,7 @@ namespace MasterServer
         /// </summary>
         private static void StartMasterServerDll()
         {
-            LmpDomain = AppDomain.CreateDomain("LMP.MasterServer", null, DomainSetup);
+            LmpDomain = AppDomain.CreateDomain("LmpMasterServer", null, DomainSetup);
             LmpDomain.SetData("Arguments", Arguments);
             LmpDomain.SetData("Stop", false);
 
@@ -75,7 +89,7 @@ namespace MasterServer
                 AppDomain.CurrentDomain.Load(File.ReadAllBytes(uhttpSharpPath));
 
                 var assembly = AppDomain.CurrentDomain.Load(File.ReadAllBytes(DllPath));
-                var entryPoint = assembly.GetType("LMP.MasterServer.EntryPoint");
+                var entryPoint = assembly.GetType("LmpMasterServer.EntryPoint");
 
                 entryPoint.GetMethod("MainEntryPoint")?.Invoke(null, new[] { AppDomain.CurrentDomain.GetData("Arguments") });
 
@@ -114,10 +128,10 @@ namespace MasterServer
                         var url = AppveyorUpdateDownloader.GetZipFileUrl(AppveyorProduct.MasterServer, DebugVersion);
                         if (!string.IsNullOrEmpty(url))
                         {
-                            ConsoleLogger.Log(LogLevels.Normal, $"Found a new updated version! Current: {CurrentVersion} Latest: {latestVersion}");
-                            ConsoleLogger.Log(LogLevels.Normal, "Downloading and restarting program....");
+                            Console.WriteLine($"Found a new updated version! Current: {CurrentVersion} Latest: {latestVersion}");
+                            Console.WriteLine("Downloading and restarting program....");
 
-                            var zipFileName = url.Substring(url.LastIndexOf("/") + 1);
+                            var zipFileName = url.Substring(url.LastIndexOf("/", StringComparison.Ordinal) + 1);
                             if (CommonDownloader.DownloadZipFile(url, Path.Combine(Directory.GetCurrentDirectory(), zipFileName)))
                             {
                                 StopMasterServerDll();
@@ -134,6 +148,13 @@ namespace MasterServer
                     await Task.Delay(5 * 1000 * 60);
                 }
             });
+        }
+
+        public static void LogError(string msg)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(msg);
+            Console.ResetColor();
         }
     }
 }

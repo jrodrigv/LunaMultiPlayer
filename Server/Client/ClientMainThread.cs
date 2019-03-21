@@ -1,9 +1,9 @@
-﻿using LunaCommon.Time;
+﻿using LmpCommon.Time;
 using Server.Command.Command;
 using Server.Context;
-using Server.Lidgren;
 using Server.Log;
 using Server.Plugin;
+using Server.Server;
 using Server.Settings.Structures;
 using System;
 using System.Linq;
@@ -13,7 +13,7 @@ namespace Server.Client
 {
     public class ClientMainThread
     {
-        public async void ThreadMain()
+        public static async void ThreadMain()
         {
             try
             {

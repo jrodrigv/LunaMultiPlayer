@@ -1,13 +1,13 @@
-﻿using LunaCommon;
-using LunaCommon.Time;
+﻿using LmpCommon;
+using LmpCommon.Time;
 using Server.Client;
 using Server.Command;
 using Server.Context;
 using Server.Events;
 using Server.Exit;
-using Server.Lidgren;
 using Server.Log;
 using Server.Plugin;
+using Server.Server;
 using Server.Settings;
 using Server.Settings.Structures;
 using Server.System;
@@ -44,10 +44,8 @@ namespace Server
                 Console.Title = $"LMP {LmpVersioning.CurrentVersion}";
 
                 Console.OutputEncoding = Encoding.Unicode;
-                ServerContext.StartTime = LunaNetworkTime.UtcNow.Ticks;
 
-                if (!Common.PlatformIsWindows()) LunaLog.Warning("Remember! Quit the server by using Control+C so the vessels are saved to the hard drive!");
-
+                LunaLog.Info("Remember! Quit the server by using 'Control + C' so a backup is properly made before closing!");
 
                 if (Common.PlatformIsWindows())
                     ExitSignal.Exit += (sender, args) => Exit();
@@ -79,31 +77,31 @@ namespace Server
                 Universe.CheckUniverse();
                 LoadSettingsAndGroups();
                 VesselStoreSystem.LoadExistingVessels();
-                ScenarioSystem.GenerateDefaultScenarios();
-                ScenarioStoreSystem.LoadExistingScenarios();
+                var scenariosCreated = ScenarioSystem.GenerateDefaultScenarios();
+                ScenarioStoreSystem.LoadExistingScenarios(scenariosCreated);
                 LmpPluginHandler.LoadPlugins();
                 WarpSystem.Reset();
+                TimeSystem.Reset();
 
                 LunaLog.Normal($"Starting '{GeneralSettings.SettingsStore.ServerName}' on Port {ConnectionSettings.SettingsStore.Port}... ");
-
+                
+                LidgrenServer.SetupLidgrenServer();
                 LmpPortMapper.OpenLmpPort().Wait();
                 LmpPortMapper.OpenWebPort().Wait();
                 ServerContext.ServerRunning = true;
-                LidgrenServer.SetupLidgrenServer();
                 WebServer.StartWebServer();
 
                 //Do not add the command handler thread to the TaskContainer as it's a blocking task
-                LongRunTaskFactory.StartNew(() => new CommandHandler().ThreadMain(), CancellationTokenSrc.Token);
+                LongRunTaskFactory.StartNew(CommandHandler.ThreadMain, CancellationTokenSrc.Token);
                 
                 TaskContainer.Add(LongRunTaskFactory.StartNew(WebServer.RefreshWebServerInformation, CancellationTokenSrc.Token));
 
                 TaskContainer.Add(LongRunTaskFactory.StartNew(LmpPortMapper.RefreshUpnpPort, CancellationTokenSrc.Token));
                 TaskContainer.Add(LongRunTaskFactory.StartNew(LogThread.RunLogThread, CancellationTokenSrc.Token));
-                TaskContainer.Add(LongRunTaskFactory.StartNew(() => new ClientMainThread().ThreadMain(), CancellationTokenSrc.Token));
+                TaskContainer.Add(LongRunTaskFactory.StartNew(ClientMainThread.ThreadMain, CancellationTokenSrc.Token));
 
                 TaskContainer.Add(LongRunTaskFactory.StartNew(() => BackupSystem.PerformBackups(CancellationTokenSrc.Token), CancellationTokenSrc.Token));
-                TaskContainer.Add(LongRunTaskFactory.StartNew(LidgrenServer.StartReceiveingMessages, CancellationTokenSrc.Token));
-                TaskContainer.Add(LongRunTaskFactory.StartNew(LidgrenMasterServer.RefreshMasterServersList, CancellationTokenSrc.Token));
+                TaskContainer.Add(LongRunTaskFactory.StartNew(LidgrenServer.StartReceivingMessages, CancellationTokenSrc.Token));
                 TaskContainer.Add(LongRunTaskFactory.StartNew(LidgrenMasterServer.RegisterWithMasterServer, CancellationTokenSrc.Token));
 
                 TaskContainer.Add(LongRunTaskFactory.StartNew(VersionChecker.RefreshLatestVersion, CancellationTokenSrc.Token));
@@ -123,10 +121,7 @@ namespace Server
             }
             catch (Exception e)
             {
-                if (e is HandledException)
-                    LunaLog.Fatal(e.Message);
-                else
-                    LunaLog.Fatal($"Error in main server thread, Exception: {e}");
+                LunaLog.Fatal(e is HandledException ? e.Message : $"Error in main server thread, Exception: {e}");
                 Console.ReadLine(); //Avoid closing automatically
             }
         }
@@ -162,12 +157,12 @@ namespace Server
         private static void Exit()
         {
             LunaLog.Normal("Exiting... Please wait until all threads are finished");
-            ServerContext.Shutdown("Server is shutting down");
-
             ExitEvent.Exit();
             
             CancellationTokenSrc.Cancel();
             Task.WaitAll(TaskContainer.ToArray());
+
+            ServerContext.Shutdown("Server is shutting down");
 
             QuitEvent.Set();
         }

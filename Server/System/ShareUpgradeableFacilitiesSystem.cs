@@ -1,5 +1,5 @@
-﻿using LunaCommon.Message.Data.ShareProgress;
-using LunaCommon.Message.Server;
+﻿using LmpCommon.Message.Data.ShareProgress;
+using LmpCommon.Message.Server;
 using Server.Client;
 using Server.Log;
 using Server.Server;
@@ -15,7 +15,7 @@ namespace Server.System
 
             //send the upgrade facility update to all other clients
             MessageQueuer.RelayMessage<ShareProgressSrvMsg>(client, data);
-            ScenarioDataUpdater.WriteFacilityLevelDataToFile(data.FacilityId, data.Level);
+            ScenarioDataUpdater.WriteFacilityLevelDataToFile(data.FacilityId, data.NormLevel);
         }
     }
 }

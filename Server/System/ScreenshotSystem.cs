@@ -1,6 +1,7 @@
-﻿using LunaCommon.Message.Data.Screenshot;
-using LunaCommon.Message.Server;
-using LunaCommon.Time;
+﻿using ByteSizeLib;
+using LmpCommon.Message.Data.Screenshot;
+using LmpCommon.Message.Server;
+using LmpCommon.Time;
 using Server.Client;
 using Server.Context;
 using Server.Log;
@@ -21,7 +22,7 @@ namespace Server.System
     public class ScreenshotSystem
     {
         private const string SmallFilePrefix = "small_";
-        private static readonly string ScreenshotFolder = Path.Combine(ServerContext.UniverseDirectory, "Screenshots");
+        public static readonly string ScreenshotPath = Path.Combine(ServerContext.UniverseDirectory, "Screenshots");
 
         private static readonly ConcurrentDictionary<string, DateTime> LastUploadRequest = new ConcurrentDictionary<string, DateTime>();
 
@@ -34,7 +35,7 @@ namespace Server.System
         {
             Task.Run(() =>
             {
-                var playerFolder = Path.Combine(ScreenshotFolder, client.PlayerName);
+                var playerFolder = Path.Combine(ScreenshotPath, client.PlayerName);
                 if (!Directory.Exists(playerFolder))
                 {
                     Directory.CreateDirectory(playerFolder);
@@ -54,7 +55,7 @@ namespace Server.System
                             ScreenshotSettings.SettingsStore.MaxScreenshotWidth,
                             ScreenshotSettings.SettingsStore.MaxScreenshotHeight);
 
-                        LunaLog.Normal($"Saving screenshot {fileName} ({data.Screenshot.NumBytes} bytes) from: {client.PlayerName}.");
+                        LunaLog.Normal($"Saving screenshot {fileName} ({ByteSize.FromBytes(data.Screenshot.NumBytes).KiloBytes}{ByteSize.KiloByteSymbol}) from: {client.PlayerName}.");
                         FileHandler.CreateFile(fullPath, scaledImageData, scaledImageData.Length);
                         CreateMiniature(fullPath);
                         SendNotification(client.PlayerName);
@@ -87,7 +88,7 @@ namespace Server.System
             Task.Run(() =>
             {
                 var msgData = ServerContext.ServerMessageFactory.CreateNewMessageData<ScreenshotFoldersReplyMsgData>();
-                msgData.Folders = Directory.GetDirectories(ScreenshotFolder).Select(d => new DirectoryInfo(d).Name).ToArray();
+                msgData.Folders = Directory.GetDirectories(ScreenshotPath).Select(d => new DirectoryInfo(d).Name).ToArray();
                 msgData.NumFolders = msgData.Folders.Length;
 
                 MessageQueuer.SendToClient<ScreenshotSrvMsg>(client, msgData);
@@ -104,7 +105,7 @@ namespace Server.System
             Task.Run(() =>
             {
                 var screenshots = new List<ScreenshotInfo>();
-                var folder = Path.Combine(ScreenshotFolder, data.FolderName);
+                var folder = Path.Combine(ScreenshotPath, data.FolderName);
 
                 var msgData = ServerContext.ServerMessageFactory.CreateNewMessageData<ScreenshotListReplyMsgData>();
                 foreach (var file in Directory.GetFiles(folder).Where(f => Path.GetFileNameWithoutExtension(f).StartsWith(SmallFilePrefix)))
@@ -145,7 +146,7 @@ namespace Server.System
         {
             Task.Run(() =>
             {
-                var file = Path.Combine(ScreenshotFolder, data.FolderName, $"{data.DateTaken}.png");
+                var file = Path.Combine(ScreenshotPath, data.FolderName, $"{data.DateTaken}.png");
                 if (File.Exists(file))
                 {
                     var bitmap = new Bitmap(file);
@@ -158,7 +159,7 @@ namespace Server.System
                     msgData.Screenshot.Width = (ushort)bitmap.Width;
                     msgData.Screenshot.FolderName = data.FolderName;
 
-                    LunaLog.Debug($"Sending screenshot ({msgData.Screenshot.NumBytes} bytes): {data.DateTaken} to: {client.PlayerName}.");
+                    LunaLog.Debug($"Sending screenshot ({ByteSize.FromBytes(msgData.Screenshot.NumBytes).KiloBytes}{ByteSize.KiloByteSymbol}): {data.DateTaken} to: {client.PlayerName}.");
                     MessageQueuer.SendToClient<ScreenshotSrvMsg>(client, msgData);
                 }
             });
@@ -184,9 +185,9 @@ namespace Server.System
         /// </summary>
         private static void CheckMaxFolders()
         {
-            while (Directory.GetDirectories(ScreenshotFolder).Length > ScreenshotSettings.SettingsStore.MaxScreenshotsFolders)
+            while (Directory.GetDirectories(ScreenshotPath).Length > ScreenshotSettings.SettingsStore.MaxScreenshotsFolders)
             {
-                var oldestFolder = Directory.GetDirectories(ScreenshotFolder).Select(d => new DirectoryInfo(d)).OrderBy(d => d.LastWriteTime).FirstOrDefault();
+                var oldestFolder = Directory.GetDirectories(ScreenshotPath).Select(d => new DirectoryInfo(d)).OrderBy(d => d.LastWriteTime).FirstOrDefault();
                 if (oldestFolder != null)
                 {
                     LunaLog.Debug($"Removing oldest screenshot folder {oldestFolder.Name}");
@@ -207,7 +208,7 @@ namespace Server.System
                 {
                     LunaLog.Debug($"Deleting old screenshot {oldestScreenshot.FullName}");
                     File.Delete(oldestScreenshot.FullName);
-                    File.Delete(Path.Combine(ScreenshotFolder, playerFolder, SmallFilePrefix + oldestScreenshot.Name));
+                    File.Delete(Path.Combine(ScreenshotPath, playerFolder, SmallFilePrefix + oldestScreenshot.Name));
                 }
             }
         }

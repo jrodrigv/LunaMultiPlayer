@@ -4,15 +4,15 @@
 </p>
 
 <p align="center">
-    <a href="https://paypal.me/gavazquez"><img src="https://img.shields.io/badge/paypal-donate-yellow.svg" alt="PayPal"/></a>
-    <a href="https://discord.gg/wKVMhWQ"><img src="https://img.shields.io/discord/378456662392045571.svg" alt="Chat on discord"/></a>
-    <a href="../../releases"><img src="https://img.shields.io/github/release/lunamultiplayer/lunamultiplayer.svg" alt="Latest release" /></a>
-    <a href="../../releases"><img src="https://img.shields.io/github/downloads/lunamultiplayer/lunamultiplayer/total.svg" alt="Total downloads" /></a>
+    <a href="https://paypal.me/gavazquez"><img src="https://img.shields.io/badge/paypal-donate-yellow.svg?style=flat&logo=paypal" alt="PayPal"/></a>
+    <a href="https://discord.gg/wKVMhWQ"><img src="https://img.shields.io/discord/378456662392045571.svg?style=flat&logo=discord&label=discord" alt="Chat on discord"/></a>
+    <a href="../../releases"><img src="https://img.shields.io/github/release/lunamultiplayer/lunamultiplayer.svg?style=flat&logo=github&logoColor=white" alt="Latest release" /></a>
+    <a href="../../releases"><img src="https://img.shields.io/github/downloads/lunamultiplayer/lunamultiplayer/total.svg?style=flat&logo=github&logoColor=white" alt="Total downloads" /></a>
 </p>
 
 <p align="center">
-    <a href="https://forum.kerbalspaceprogram.com/index.php?/topic/168271-131-luna-multiplayer-lmp-alpha"><img src="https://img.shields.io/badge/KSP%20Forum-Post-4265f4.svg" alt="KSP forum post"/></a>
-    <a href="https://github.com/LunaMultiplayer/LunaMultiplayerUpdater"><img src="https://img.shields.io/badge/Automatic-Updater-4265f4.svg" alt="Latest build updater"/></a>
+    <a href="https://forum.kerbalspaceprogram.com/index.php?/topic/168271-131-luna-multiplayer-lmp-alpha"><img src="https://img.shields.io/badge/KSP%20Forum-Post-4265f4.svg?style=flat" alt="KSP forum post"/></a>
+    <a href="https://github.com/LunaMultiplayer/LunaMultiplayerUpdater"><img src="https://img.shields.io/badge/Automatic-Updater-4265f4.svg?style=flat" alt="Latest build updater"/></a>
 </p>
 
 ---
@@ -43,29 +43,19 @@
 - [x] Better creation of network messages so they are easier to modify and serialize.
 - [x] Every network message is cached in order to reduce the garbage collector spikes.
 - [x] Based on tasks instead of threads.
-- [x] Supports career and science modes.
-- [ ] [QuickLZ](http://www.quicklz.com) for fast compression.
+- [x] Supports career and science modes (funds, science, strategies, etc are shared between all players).
+- [x] Cached [QuickLZ](http://www.quicklz.com) for fast compression without generating garbage.
 - [ ] Support for groups/companies inside career and science modes.
 
 Please check the [wiki](../../wiki) to see how to [install](../../wiki/How-to-install-LMP), [run](../../wiki/How-to-play-with-LMP), [build](../../wiki/How-to-compile-LMP) or [debug](../../wiki/Debugging-in-Visual-studio) LMP among other things
 
 ---
-### Servers:
+### Troubleshooting:
 
-Check how many servers are up and running either in [Release](../../wiki/How-to-get-the-latest-version-of-LMP) or in [Nightly](../../wiki/How-to-get-nightly-builds) versions
-
-| [Release servers](http://dagger.ole32.com:8701) | [Nightly servers](http://dagger.ole32.com:8751) |
-| ------------------------------------------------------  | ------------------------------------------------------- |
----
-
-### Status:
-
-|   Branch   |   Build  |   Tests  |  Last commit  |   Activity    |    Commits    |
-| ---------- | -------- | -------- | ------------- | ------------- | ------------- |
-| **master** |[![AppVeyor](https://img.shields.io/appveyor/ci/gavazquez/lunamultiplayer/master.svg?logo=appveyor)](https://ci.appveyor.com/project/gavazquez/lunamultiplayer/branch/master) | [![AppVeyor Tests](https://img.shields.io/appveyor/tests/gavazquez/lunamultiplayer/master.svg?logo=appveyor)](https://ci.appveyor.com/project/gavazquez/lunamultiplayer/branch/master/tests) | [![Last commit](https://img.shields.io/github/last-commit/lunamultiplayer/lunamultiplayer/master.svg)](../../commits/master) | [![Commit activity](https://img.shields.io/github/commit-activity/y/lunamultiplayer/lunamultiplayer.svg)](../../commits/master) | [![Commits since release](https://img.shields.io/github/commits-since/lunamultiplayer/lunamultiplayer/latest.svg)](../../commits/master)
+Please visit [this page](../../wiki/Troubleshooting) in the wiki to solve the most common issues with LMP 
+[![Analytics](https://ga-beacon.appspot.com/UA-118326748-1/Home?pixel&useReferer)](https://github.com/igrigorik/ga-beacon)
 
 ---
-
 ### Contributing:
 
 Consider [donating trough paypal](https://paypal.me/gavazquez) if you like this project. 
@@ -77,11 +67,27 @@ It's **very** important that the code is clean and documented so in case someone
 There's also a test project in case you want to add tests to your code.
 
 ---
+### Servers:
 
-### Troubleshooting:
+You can check [how many servers are up](../../wiki/Master-server-status) and running either in [Release](../../wiki/How-to-get-the-latest-version-of-LMP) or in [Nightly](../../wiki/How-to-get-nightly-builds) versions through our [master servers](../../wiki/Master-server)
 
-Please visit [this page](../../wiki/Troubleshooting) in the wiki to solve the most common issues with LMP 
-[![Analytics](https://ga-beacon.appspot.com/UA-118326748-1/Home?pixel&useReferer)](https://github.com/igrigorik/ga-beacon)
+| Master server | Release | Nightly |
+| ------------  | ------- |-------- |
+[Dagger](https://github.com/gavazquez) | [![Release servers](https://img.shields.io/website-up-down-brightgreen-red/http/servers.lunamultiplayer.com:8701.svg?label=status)](http://servers.lunamultiplayer.com:8701) | [![Nightly servers](https://img.shields.io/website-up-down-brightgreen-red/http/servers.lunamultiplayer.com:8751.svg?label=status&colorB=brightgreen)](http://servers.lunamultiplayer.com:8751) |
+[PictoCube](https://github.com/Alfred-PictoCube) | [![Release servers](https://img.shields.io/website-up-down-brightgreen-red/http/pictocube.ddns.net:8701.svg?label=status)](http://pictocube.ddns.net:8701) | [![Nightly servers](https://img.shields.io/website-up-down-brightgreen-red/http/pictocube.ddns.net:8711.svg?label=status)](http://pictocube.ddns.net:8711) |
+Tekbot | [![Release servers](https://img.shields.io/website-up-down-brightgreen-red/http/tekbot.lunamultiplayer.com:8701.svg?label=status)](http://tekbot.lunamultiplayer.com:8701) | [![Nightly servers](https://img.shields.io/website-up-down-brightgreen-red/http/tekbot.lunamultiplayer.com:8751.svg?label=status)](http://tekbot.lunamultiplayer.com:8751) |
+Angryjoshi | [![Release servers](https://img.shields.io/website-up-down-brightgreen-red/http/anschuetznet.de:8701.svg?label=status)](http://anschuetznet.de:8701) | [![Nightly servers](https://img.shields.io/website-up-down-brightgreen-red/http/anschuetznet.de:8751.svg?label=status)](http://anschuetznet.de:8751) |
+
+---
+### Status:
+
+|   Branch   |   Build  |   Tests  |  Last commit  |   Activity    |    Commits    |
+| ---------- | -------- | -------- | ------------- | ------------- | ------------- |
+| **master** |[![AppVeyor](https://img.shields.io/appveyor/ci/gavazquez/lunamultiplayer/master.svg?style=flat&logo=appveyor)](https://ci.appveyor.com/project/gavazquez/lunamultiplayer/branch/master) | [![AppVeyor Tests](https://img.shields.io/appveyor/tests/gavazquez/lunamultiplayer/master.svg?style=flat&logo=appveyor)](https://ci.appveyor.com/project/gavazquez/lunamultiplayer/branch/master/tests) | [![Last commit](https://img.shields.io/github/last-commit/lunamultiplayer/lunamultiplayer/master.svg?style=flat&logo=github&logoColor=white)](../../commits/master) | [![Commit activity](https://img.shields.io/github/commit-activity/y/lunamultiplayer/lunamultiplayer.svg?style=flat&logo=github&logoColor=white)](../../commits/master) | [![Commits since release](https://img.shields.io/github/commits-since/lunamultiplayer/lunamultiplayer/latest.svg?style=flat&logo=github&logoColor=white)](../../commits/master)
+
+<p align="center">
+    <a href="https://ci.appveyor.com/project/gavazquez/lunamultiplayer/history"><img src="https://buildstats.info/appveyor/chart/gavazquez/lunamultiplayer?buildCount=100" alt="Build history"/></a>
+</p>
 
 ---
 

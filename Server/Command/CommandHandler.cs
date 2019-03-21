@@ -1,7 +1,6 @@
 ﻿using Server.Command.Command;
 using Server.Context;
 using Server.Log;
-using Server.Settings.Structures;
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
@@ -28,7 +27,10 @@ namespace Server.Command
             RegisterCommand("help", new DisplayHelpCommand().Execute, "Displays this help");
             RegisterCommand("kick", new KickCommand().Execute, "Kicks a player from the server");
             RegisterCommand("listclients", new ListClientsCommand().Execute, "Lists connected clients");
+            RegisterCommand("listlocks", new ListLocksCommand().Execute, "Lists current locks");
             RegisterCommand("nukeksc", new NukeCommand().Execute, "Clears ALL vessels from KSC and the runway");
+            RegisterCommand("setfunds", new SetFundsCommand().Execute, "Set funds value");
+            RegisterCommand("setscience", new SetScienceCommand().Execute, "Set science value");
             RegisterCommand("restartserver", new RestartServerCommand().Execute, "Restarts the server");
             RegisterCommand("say", new SayCommand().Execute, "Broadcasts a message to clients");
         }
@@ -36,7 +38,7 @@ namespace Server.Command
         /// <summary>
         /// We receive the console inputs with a pipe
         /// </summary>
-        public async void ThreadMain()
+        public static async void ThreadMain()
         {
             try
             {
@@ -59,7 +61,9 @@ namespace Server.Command
                             Commands["say"].Func(input);
                         }
                     }
-                    await Task.Delay(IntervalSettings.SettingsStore.MainTimeTick);
+
+                    //We only accept a command once every 500ms
+                    await Task.Delay(500);
                 }
             }
             catch (Exception e)

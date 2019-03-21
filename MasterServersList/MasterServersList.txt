@@ -1,18 +1,18 @@
 #Here you specify the ips or hostnames of all the master servers followed by ":" and the port. 
 #Then each client will query them for the servers and each server will register against them
-#Dagger. List: http://dagger.ole32.com:8701
-dagger.ole32.com:8700
-#Dagger nightly. List: http://dagger.ole32.com:8751
-dagger.ole32.com:8750
-#PictoCube (Alfred). List: http://37.187.108.37:8701
-37.187.108.37:8700
-#PictoCube (Alfred) nightly. List: http://37.187.108.37:8711
-37.187.108.37:8710
-#Zarlo's. List: http://ms.lmp.pksky.xyz:8701
-ms.lmp.pksky.xyz:8700
-#Spazer. List: http://kerbalspace.spazer.net:8701
-kerbalspace.spazer.net:8700
-#Tekbot. List: http://ms.lmp.dnsd.info:8701/
-ms.lmp.dnsd.info:8701
-#Tekbot Nightly. List: http://ms.lmp.dnsd.info:8751/
-ms.lmp.dnsd.info:8751
+#Dagger. List: http://servers.lunamultiplayer.com:8701
+servers.lunamultiplayer.com:8700
+#Dagger nightly. List: http://servers.lunamultiplayer.com:8751
+servers.lunamultiplayer.com:8750
+#PictoCube (Alfred). List: http://pictocube.ddns.net:8701
+pictocube.ddns.net:8700
+#PictoCube (Alfred) nightly. List: http://pictocube.ddns.net:8711
+pictocube.ddns.net:8710
+#Tekbot. List: http://tekbot.lunamultiplayer.com:8701/
+tekbot.lunamultiplayer.com:8701
+#Tekbot Nightly. List: http://tekbot.lunamultiplayer.com:8751/
+tekbot.lunamultiplayer.com:8751
+#Angryjoshi. List: http://anschuetznet.de:8701/
+anschuetznet.de:8700
+#Angryjoshi Nightly. List: http://anschuetznet.de:8751/
+anschuetznet.de:8750

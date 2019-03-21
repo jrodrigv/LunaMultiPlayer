@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -44,8 +44,11 @@
     <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="LiteDB, Version=4.1.3.0, Culture=neutral, PublicKeyToken=4ee40123013c9f27, processorArchitecture=MSIL">
-      <HintPath>..\External\Nuget\LiteDB.4.1.3\lib\net40\LiteDB.dll</HintPath>
+    <Reference Include="ByteSize, Version=1.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\External\Nuget\ByteSize.1.3.0\lib\net45\ByteSize.dll</HintPath>
+    </Reference>
+    <Reference Include="LunaConfigNode, Version=1.8.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\External\Nuget\LunaConfigNode.1.8.1\lib\net35\LunaConfigNode.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Open.Nat, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f22a6a4582336c76, processorArchitecture=MSIL">
@@ -72,6 +75,7 @@
     <Compile Include="Command\Command\Base\HandledCommand.cs" />
     <Compile Include="Command\Command\Base\SimpleCommand.cs" />
     <Compile Include="Command\Command\ChangeSettingsCommand.cs" />
+    <Compile Include="Command\Command\ListLocksCommand.cs" />
     <Compile Include="Command\Command\RestartServerCommand.cs" />
     <Compile Include="Command\Command\ConnectionStatsCommand.cs" />
     <Compile Include="Command\Command\CountClientsCommand.cs" />
@@ -82,19 +86,19 @@
     <Compile Include="Command\Command\ClearVesselsCommand.cs" />
     <Compile Include="Command\Command\NukeCommand.cs" />
     <Compile Include="Command\Command\SayCommand.cs" />
+    <Compile Include="Command\Command\SetScienceCommand.cs" />
+    <Compile Include="Command\Command\SetFundsCommand.cs" />
     <Compile Include="Command\Common\CommandSystemHelperMethods.cs" />
-    <Compile Include="Context\Constants.cs" />
     <Compile Include="Context\ServerContext.cs" />
     <Compile Include="Context\Universe.cs" />
+    <Compile Include="Context\TimeContext.cs" />
     <Compile Include="Context\WarpContext.cs" />
-    <Compile Include="Enums\RelaySystemMode.cs" />
     <Compile Include="Events\ExitEvent.cs" />
     <Compile Include="Exit\WinExitSignal.cs" />
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="Lidgren\LidgrenMasterServer.cs" />
-    <Compile Include="Lidgren\LidgrenServer.cs" />
+    <Compile Include="Server\LidgrenMasterServer.cs" />
+    <Compile Include="Server\LidgrenServer.cs" />
     <Compile Include="Log\LogExpire.cs" />
-    <Compile Include="Log\LogLevels.cs" />
     <Compile Include="Log\LogThread.cs" />
     <Compile Include="Log\LunaLog.cs" />
     <Compile Include="MainServer.cs" />
@@ -126,7 +130,7 @@
     <Compile Include="Settings\Base\ISettings.cs" />
     <Compile Include="Settings\Definition\ConnectionSettingsDefinition.cs" />
     <Compile Include="Settings\Definition\CraftSettingsDefinition.cs" />
-    <Compile Include="Settings\Definition\InterpolationSettingsDefinition.cs" />
+    <Compile Include="Settings\Definition\DedicatedServerSettingsDefinition.cs" />
     <Compile Include="Settings\Definition\IntervalSettingsDefinition.cs" />
     <Compile Include="Settings\Definition\LogSettingsDefinition.cs" />
     <Compile Include="Settings\Definition\MasterServerSettingsDefinition.cs" />
@@ -135,7 +139,7 @@
     <Compile Include="Settings\Definition\WebsiteSettingsDefinition.cs" />
     <Compile Include="Settings\SettingsHandler.cs" />
     <Compile Include="Settings\Structures\ConnectionSettings.cs" />
-    <Compile Include="Settings\Structures\InterpolationSettings.cs" />
+    <Compile Include="Settings\Structures\DedicatedServerSettings.cs" />
     <Compile Include="Settings\Structures\IntervalSettings.cs" />
     <Compile Include="Settings\Structures\LogSettings.cs" />
     <Compile Include="Settings\Structures\WebsiteSettings.cs" />
@@ -143,6 +147,10 @@
     <Compile Include="Settings\Structures\ScreenshotSettings.cs" />
     <Compile Include="Settings\Structures\CraftSettings.cs" />
     <Compile Include="Settings\Structures\MasterServerSettings.cs" />
+    <Compile Include="System\Scenario\ScenarioExperimentalPartDataUpdater.cs" />
+    <Compile Include="System\ShareExperimentalPartSystem.cs" />
+    <Compile Include="System\Vessel\Classes\Part.cs" />
+    <Compile Include="System\Vessel\Classes\Vessel.cs" />
     <Compile Include="System\BackupSystem.cs" />
     <Compile Include="System\CraftLibrarySystem.cs" />
     <Compile Include="System\HandshakeSystem.cs" />
@@ -196,19 +204,26 @@
     <Compile Include="System\ShareStrategySystem.cs" />
     <Compile Include="System\ShareTechnologySystem.cs" />
     <Compile Include="System\VesselContext.cs" />
-    <Compile Include="System\VesselDataUpdater.cs" />
+    <Compile Include="System\Vessel\VesselDataUpdater.cs" />
     <Compile Include="System\VesselStoreSystem.cs" />
+    <Compile Include="System\Vessel\VesselPartSyncUiFieldDataUpdater.cs" />
+    <Compile Include="System\Vessel\VesselActionGroupDataUpdater.cs" />
+    <Compile Include="System\Vessel\VesselResourceDataUpdater.cs" />
+    <Compile Include="System\Vessel\VesselPartSyncFieldDataUpdater.cs" />
+    <Compile Include="System\Vessel\VesselUpdateDataUpdater.cs" />
+    <Compile Include="System\Vessel\VesselFlightStateDataUpdater.cs" />
+    <Compile Include="System\Vessel\VesselPositionDataUpdater.cs" />
+    <Compile Include="System\Vessel\VesselFairingDataUpdater.cs" />
+    <Compile Include="System\TimeSystem.cs" />
     <Compile Include="System\WarpSystem.cs" />
     <Compile Include="System\WarpSystemReceiver.cs" />
     <Compile Include="System\WarpSystemSender.cs" />
     <Compile Include="Upnp\LmpPortMapper.cs" />
-    <Compile Include="Utilities\ExtensionMethods.cs" />
     <Compile Include="Utilities\HandledException.cs" />
     <Compile Include="Utilities\VersionChecker.cs" />
     <Compile Include="Web\Handlers\ExceptionHandler.cs" />
     <Compile Include="Web\Handlers\HttpException.cs" />
     <Compile Include="Web\Structures\CurrentState.cs" />
-    <Compile Include="Web\Structures\Settings\ServerInterpolationSettings.cs" />
     <Compile Include="Web\Structures\Settings\ServerWebsiteSettings.cs" />
     <Compile Include="Web\Structures\Settings\ServerConnectionSettings.cs" />
     <Compile Include="Web\Structures\Settings\ServerGameplaySettings.cs" />
@@ -226,17 +241,17 @@
     <Compile Include="Web\Handlers\ServerInformationRestController.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Common\Common.csproj">
-      <Project>{423c5a4b-ea79-450d-bd86-5b46141d58d1}</Project>
-      <Name>Common</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Lidgren.Network\Lidgren.Network.csproj">
       <Project>{49ba1c69-6104-41ac-a5d8-b54fa9f696e8}</Project>
       <Name>Lidgren.Network</Name>
     </ProjectReference>
-    <ProjectReference Include="..\LunaUpdater\LunaUpdater.csproj">
+    <ProjectReference Include="..\LmpCommon\LmpCommon.csproj">
+      <Project>{423c5a4b-ea79-450d-bd86-5b46141d58d1}</Project>
+      <Name>LmpCommon</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LmpUpdater\LmpUpdater.csproj">
       <Project>{35a57b77-236e-492c-b003-1f8fc2f544f3}</Project>
-      <Name>LunaUpdater</Name>
+      <Name>LmpUpdater</Name>
     </ProjectReference>
     <ProjectReference Include="..\uhttpsharp\uhttpsharp.csproj">
       <Project>{3d681959-4da3-4a71-a68b-704d6411d5ea}</Project>
@@ -253,26 +268,26 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resources\Scenario\CommNetScenario.txt" />
+    <Content Include="Resources\Scenario\ContractSystem.txt" />
+    <Content Include="Resources\Scenario\Funding.txt" />
+    <Content Include="Resources\Scenario\PartUpgradeManager.txt" />
+    <Content Include="Resources\Scenario\ProgressTracking.txt" />
+    <Content Include="Resources\Scenario\Reputation.txt" />
+    <Content Include="Resources\Scenario\ResearchAndDevelopment.txt" />
+    <Content Include="Resources\Scenario\ResourceScenario.txt" />
+    <Content Include="Resources\Scenario\ScenarioAchievements.txt" />
+    <Content Include="Resources\Scenario\ScenarioContractEvents.txt" />
+    <Content Include="Resources\Scenario\ScenarioDestructibles.txt" />
+    <Content Include="Resources\Scenario\ScenarioNewGameIntro.txt" />
+    <Content Include="Resources\Scenario\ScenarioUpgradeableFacilities.txt" />
+    <Content Include="Resources\Scenario\SentinelScenario.txt" />
+    <Content Include="Resources\Scenario\StrategySystem.txt" />
+    <Content Include="Resources\Scenario\VesselRecovery.txt" />
     <None Include="favicon.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <Content Include="icon.ico" />
-    <Content Include="Resources\Scenario\ScenarioNewGameIntro.xml" />
-    <Content Include="Resources\Scenario\CommNetScenario.xml" />
-    <Content Include="Resources\Scenario\ContractSystem.xml" />
-    <Content Include="Resources\Scenario\Funding.xml" />
-    <Content Include="Resources\Scenario\PartUpgradeManager.xml" />
-    <Content Include="Resources\Scenario\ProgressTracking.xml" />
-    <Content Include="Resources\Scenario\Reputation.xml" />
-    <Content Include="Resources\Scenario\ResearchAndDevelopment.xml" />
-    <Content Include="Resources\Scenario\ResourceScenario.xml" />
-    <Content Include="Resources\Scenario\ScenarioAchievements.xml" />
-    <Content Include="Resources\Scenario\ScenarioContractEvents.xml" />
-    <Content Include="Resources\Scenario\ScenarioDestructibles.xml" />
-    <Content Include="Resources\Scenario\ScenarioUpgradeableFacilities.xml" />
-    <Content Include="Resources\Scenario\SentinelScenario.xml" />
-    <Content Include="Resources\Scenario\StrategySystem.xml" />
-    <Content Include="Resources\Scenario\VesselRecovery.xml" />
     <None Include="packages.config" />
     <None Include="Resources\Kerbals\Valentina Kerman.txt" />
     <None Include="Resources\Kerbals\Jebediah Kerman.txt" />

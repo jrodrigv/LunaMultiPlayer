@@ -1,50 +1,50 @@
-﻿using LunaCommon.Message.Data.ShareProgress;
-using LunaCommon.Xml;
-using Server.Utilities;
+﻿using LmpCommon.Message.Data.ShareProgress;
+using LunaConfigNode.CfgNode;
+using System.Globalization;
 using System.Threading.Tasks;
-using System.Xml;
 
 namespace Server.System.Scenario
 {
     public partial class ScenarioDataUpdater
     {
         /// <summary>
-        /// We received a part purchase message so update the scenario file accordingly
+        /// We received a experimental part message so update the scenario file accordingly
         /// </summary>
-        public static void WritePartPurchaseDataToFile(ShareProgressPartPurchaseMsgData partPurchaseMsg)
+        public static void WriteExperimentalPartDataToFile(ShareProgressExperimentalPartMsgData experimentalPartMsg)
         {
             Task.Run(() =>
             {
                 lock (Semaphore.GetOrAdd("ResearchAndDevelopment", new object()))
                 {
-                    if (!ScenarioStoreSystem.CurrentScenariosInXmlFormat.TryGetValue("ResearchAndDevelopment", out var xmlData)) return;
+                    if (!ScenarioStoreSystem.CurrentScenarios.TryGetValue("ResearchAndDevelopment", out var scenario)) return;
 
-                    var updatedText = UpdateScenarioWithPartPurchaseData(xmlData, partPurchaseMsg.TechId, partPurchaseMsg.PartName);
-                    ScenarioStoreSystem.CurrentScenariosInXmlFormat.TryUpdate("ResearchAndDevelopment", updatedText, xmlData);
+                    var expPartNode = scenario.GetNode("ExpParts");
+                    if (expPartNode == null && experimentalPartMsg.Count > 0)
+                    {
+                        scenario.AddNode(new ConfigNode("ExpParts", scenario));
+                        expPartNode = scenario.GetNode("ExpParts");
+                    }
+
+                    var specificExpPart = expPartNode?.Value.GetValue(experimentalPartMsg.PartName);
+                    if (specificExpPart == null)
+                    {
+                        var newVal = new CfgNodeValue<string, string>(experimentalPartMsg.PartName,
+                            experimentalPartMsg.Count.ToString(CultureInfo.InvariantCulture));
+
+                        expPartNode?.Value.CreateValue(newVal);
+                    }
+                    else
+                    {
+                        if (experimentalPartMsg.Count == 0)
+                            expPartNode.Value.RemoveValue(specificExpPart.Value);
+                        else
+                            specificExpPart.Value = experimentalPartMsg.Count.ToString(CultureInfo.InvariantCulture);
+                    }
+
+                    if (expPartNode?.Value.GetAllValues().Count == 0)
+                        scenario.RemoveNode(expPartNode.Value);
                 }
             });
-        }
-
-        /// <summary>
-        /// Patches the scenario file with part purchase data
-        /// </summary>
-        private static string UpdateScenarioWithPartPurchaseData(string scenarioData, string techId, string partName)
-        {
-            var document = new XmlDocument();
-            document.LoadXml(scenarioData);
-
-            var techNode = document.SelectSingleNode($"/{ConfigNodeXmlParser.StartElement}/{ConfigNodeXmlParser.ParentNode}[@name='Tech']" +
-                                                    $@"/{ConfigNodeXmlParser.ValueNode}[@name='id' and text()=""{techId}""]" +
-                                                    $"/parent::{ConfigNodeXmlParser.ParentNode}[@name='Tech']");
-            if (techNode != null)
-            {
-                var newPart = ConfigNodeXmlParser.CreateXmlParameter("part", document);
-                newPart.InnerXml = partName;
-
-                techNode.AppendChild(newPart);
-            }
-
-            return document.ToIndentedString();
         }
     }
 }

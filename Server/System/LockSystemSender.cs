@@ -1,6 +1,6 @@
-﻿using LunaCommon.Locks;
-using LunaCommon.Message.Data.Lock;
-using LunaCommon.Message.Server;
+﻿using LmpCommon.Locks;
+using LmpCommon.Message.Data.Lock;
+using LmpCommon.Message.Server;
 using Server.Client;
 using Server.Context;
 using Server.Log;
@@ -39,7 +39,7 @@ namespace Server.System
             }
         }
 
-        public static void SendLockAquireMessage(ClientStructure client, LockDefinition lockDefinition, bool force)
+        public static void SendLockAcquireMessage(ClientStructure client, LockDefinition lockDefinition, bool force)
         {
             if (LockSystem.AcquireLock(lockDefinition, force, out var repeatedAcquire))
             {

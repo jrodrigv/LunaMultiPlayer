@@ -1,5 +1,7 @@
-﻿using Server.Log;
+﻿using ByteSizeLib;
+using Server.Log;
 using Server.System;
+using System;
 using System.IO;
 using System.Linq;
 
@@ -7,52 +9,49 @@ namespace Server.Context
 {
     public class Universe
     {
-        // Check universe folder size
-        public static long GetUniverseSize()
+        /// <summary>
+        /// Gets the universe folder size. Caution! This method is not thread safe!
+        /// </summary>
+        private static double GetUniverseSize()
         {
-            var kerbals = FileHandler.GetFilesInPath(Path.Combine(ServerContext.UniverseDirectory, "Kerbals"));
-            var vessels = FileHandler.GetFilesInPath(Path.Combine(ServerContext.UniverseDirectory, "Vessels"));
+            if (!Directory.Exists(ServerContext.UniverseDirectory))
+                return 0;
 
-            var directorySize = kerbals.Select(kerbal => new FileInfo(kerbal)).Select(kInfo => kInfo.Length).Sum();
-            directorySize += vessels.Select(vessel => new FileInfo(vessel)).Select(vInfo => vInfo.Length).Sum();
-
-            return directorySize;
+            var size = ByteSize.FromBytes(Directory.GetFiles(ServerContext.UniverseDirectory, "*.*")
+                .Select(f => new FileInfo(f)).Select(i => i.Length).Sum()).KiloBytes;
+            
+            return Math.Round(size, 3);
         }
 
-        public static void RemoveFromUniverse(string path)
-        {
-            FileHandler.FileDelete(path);
-        }
-
-        //Create universe directories
+        /// <summary>
+        /// Create universe directories
+        /// </summary>
         public static void CheckUniverse()
         {
-            LunaLog.Debug("Loading universe... ");
+            LunaLog.Debug($"Loading universe... {GetUniverseSize()}{ByteSize.KiloByteSymbol}");
+
             if (!FileHandler.FileExists(ServerContext.ModFilePath))
                 ModFileSystem.GenerateNewModFile();
             if (!FileHandler.FolderExists(ServerContext.UniverseDirectory))
                 FileHandler.FolderCreate(ServerContext.UniverseDirectory);
-            if (!FileHandler.FolderExists(Path.Combine(ServerContext.UniverseDirectory, "Crafts")))
-                FileHandler.FolderCreate(Path.Combine(ServerContext.UniverseDirectory, "Crafts"));
-            if (!FileHandler.FolderExists(Path.Combine(ServerContext.UniverseDirectory, "Screenshots")))
-                FileHandler.FolderCreate(Path.Combine(ServerContext.UniverseDirectory, "Screenshots"));
-            if (!FileHandler.FolderExists(Path.Combine(ServerContext.UniverseDirectory, "Flags")))
-                FileHandler.FolderCreate(Path.Combine(ServerContext.UniverseDirectory, "Flags"));
-            if (!FileHandler.FolderExists(Path.Combine(ServerContext.UniverseDirectory, "Groups")))
-                FileHandler.FolderCreate(Path.Combine(ServerContext.UniverseDirectory, "Groups"));
+
+            if (!FileHandler.FolderExists(CraftLibrarySystem.CraftPath))
+                FileHandler.FolderCreate(CraftLibrarySystem.CraftPath);
+            if (!FileHandler.FolderExists(FlagSystem.FlagPath))
+                FileHandler.FolderCreate(FlagSystem.FlagPath);
+            if (!FileHandler.FolderExists(GroupSystem.GroupsPath))
+                FileHandler.FolderCreate(GroupSystem.GroupsPath);
+            if (!FileHandler.FolderExists(ScreenshotSystem.ScreenshotPath))
+                FileHandler.FolderCreate(ScreenshotSystem.ScreenshotPath);
             if (!FileHandler.FolderExists(KerbalSystem.KerbalsPath))
             {
                 FileHandler.FolderCreate(KerbalSystem.KerbalsPath);
                 KerbalSystem.GenerateDefaultKerbals();
             }
-            if (!FileHandler.FolderExists(Path.Combine(ServerContext.UniverseDirectory, "Players")))
-                FileHandler.FolderCreate(Path.Combine(ServerContext.UniverseDirectory, "Players"));
-            if (!FileHandler.FolderExists(Path.Combine(ServerContext.UniverseDirectory, "Relay")))
-                FileHandler.FolderCreate(Path.Combine(ServerContext.UniverseDirectory, "Relay"));
-            if (!FileHandler.FolderExists(Path.Combine(ServerContext.UniverseDirectory, "Scenarios")))
-                FileHandler.FolderCreate(Path.Combine(ServerContext.UniverseDirectory, "Scenarios"));
-            if (!FileHandler.FolderExists(Path.Combine(ServerContext.UniverseDirectory, "Vessels")))
-                FileHandler.FolderCreate(Path.Combine(ServerContext.UniverseDirectory, "Vessels"));
+            if (!FileHandler.FolderExists(ScenarioSystem.ScenariosPath))
+                FileHandler.FolderCreate(ScenarioSystem.ScenariosPath);
+            if (!FileHandler.FolderExists(VesselStoreSystem.VesselsPath))
+                FileHandler.FolderCreate(VesselStoreSystem.VesselsPath);
         }
     }
 }
